@@ -2,36 +2,41 @@ require "yaml"
 
 class Game
   def initialize
-    @secret_word = load_dictionary(5, 12, "5desk.txt").sample.chomp.upcase
+    @secret_word = load_dictionary(5, 12, "./lib/5desk.txt").sample.chomp.upcase
     @render_word = "_" * @secret_word.length
     @prev_letters = []
     @missed_letters = []
   end
 
   def load_dictionary(min_length, max_length, dictionary_path)
-  dictionary = []
-  File.open(dictionary_path).readlines.each do |line|
-    dictionary << line.chomp if line.chomp.length >= min_length && line.chomp.length <= max_length
-  end
-  return dictionary
+    dictionary = []
+    File.open(dictionary_path).readlines.each do |line|
+      dictionary << line.chomp if line.chomp.length >= min_length && line.chomp.length <= max_length
+    end
+    return dictionary
   end
 
-  def get_letter
-    letter = ""
-    show_screen "Please choose a letter or save your game! (A-Z; SAVE)"
-    loop do 
-      letter = gets.chomp.upcase
-      if letter == "SAVE"
-        save_game
-      elsif @prev_letters.include? letter
-        show_screen("You already choose this letter. Please choose another one! (A-Z)")
-      else
-        break if ("A".."Z").include? letter
-        show_screen "Invalid input! Try again!"
-      end
+  def guess(letter)
+    response = :none
+    letter = letter.to_s.upcase
+
+    if letter == "SAVE"
+      save_game
+      response = :saved
+    elsif letter == "LOAD"
+      load_game
+      response = :loaded
+    elsif @prev_letters.include? letter
+      response = :repeat
+    elsif  ("A".."Z").include? letter
+      evaluate_letter(letter) ? response = :found : response = :miss
     end
+
     @prev_letters << letter
-    return letter
+    output = {render_word:       @render_word,
+              missed_letters:    @missed_letters,
+              response:          response}
+    return output
   end
 
   def evaluate_letter(selected_letter)
@@ -43,91 +48,22 @@ class Game
       end
     end
     @missed_letters << selected_letter unless found
+    return found
   end
 
   def save_game
     File.open("save.hmsv", "w+") do |file|
       file.puts YAML::dump(self)
     end
-    show_screen "Game saved!\nPlease choose a letter or save your game! (A-Z; SAVE)"
   end
 
-  def show_screen(message)
-    system "clear"
-    
-    puts render_hangman
-    puts "Missed letters: " + @missed_letters.join(", ") + "\n\n"
-    puts @render_word
-    puts "\n" + message
-  end
-
-  def render_hangman
-    hangman = [['   +===+  ',   
-               '   |   |  ',
-               '       |  ',
-               '       |  ',
-               '       |  ',
-               '       |  ',
-               '=========='],
-               ['   +===+  ',   
-               '   |   |  ',
-               '   O   |  ',
-               '       |  ',
-               '       |  ',
-               '       |  ',
-               '=========='],
-               ['   +===+  ',   
-               '   |   |  ',
-               '   O   |  ',
-               '   I   |  ',
-               '       |  ',
-               '       |  ',
-               '=========='],
-               ['   +===+  ',   
-               '   |   |  ',
-               '   O   |  ',
-               '  /I   |  ',
-               '       |  ',
-               '       |  ',
-               '=========='],
-               ['   +===+  ',   
-               '   |   |  ',
-               '   O   |  ',
-               '  /I\  |  ',
-               '       |  ',
-               '       |  ',
-               '=========='],
-               ['   +===+  ',   
-               '   |   |  ',
-               '   O   |  ',
-               '  /I\  |  ',
-               '  /    |  ',
-               '       |  ',
-               '=========='],
-               ['   +===+  ',   
-               '   |   |  ',
-               '   O   |  ',
-               '  /I\  |  ',
-               '  / \  |  ',
-               '       |  ',
-               '==========']]
-
-    puts hangman[@missed_letters.length]
-  end
-
-  def start
-  loop do
-    show_screen("Choose a letter")
-    evaluate_letter(get_letter)
-    if @secret_word == @render_word
-      show_screen "You got it!"
-      break
-    elsif @missed_letters.length >= 6
-      @render_word = @secret_word
-      show_screen "Out of guesses. You lost!"
-      break
-    end
-  end
+  def load_game
+    save_file = File.open("save.hmsv", "r")
+    g = YAML::load(save_file)
+    @secret_word = g.secret_word
+    @render_word = g.render_word
+    @prev_letters = g.prev_letters
+    @missed_letters = g.missed_letters.join(" ")
   end
 end
 
