@@ -26,8 +26,10 @@ post "/" do
     when :win
       msg = "You have won!"
     when :saved
+      session[:save_file] = session[:game].save_game
       msg = "Game saved!"
     when :loaded
+      session[:game].load_game(session[:save_file])
       msg = "Game loaded!"
     when :repeat
       msg = "You have already choose this letter!"

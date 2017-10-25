@@ -24,10 +24,8 @@ class Game
     if win?
       response == :win
     elsif letter == "SAVE"
-      save_game
       response = :saved
     elsif letter == "LOAD"
-      load_game
       response = :loaded
     elsif @prev_letters.include? letter
       response = :repeat
@@ -62,13 +60,10 @@ class Game
   end
 
   def save_game
-    File.open("save.hmsv", "w+") do |file|
-      file.puts YAML::dump(self)
-    end
+    YAML::dump(self)
   end
 
-  def load_game
-    save_file = File.open("save.hmsv", "r")
+  def load_game(save_file)
     g = YAML::load(save_file)
     @secret_word = g.secret_word
     @render_word = g.render_word
