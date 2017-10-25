@@ -1,0 +1,5 @@
+--- !ruby/object:Game
+secret_word: TRIPLET
+render_word: _______
+prev_letters: []
+missed_letters: []

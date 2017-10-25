@@ -1,6 +1,7 @@
 require "yaml"
 
 class Game
+  attr_reader :secret_word, :render_word, :prev_letters, :missed_letters
   def initialize
     @secret_word = load_dictionary(5, 12, "./lib/5desk.txt").sample.chomp.upcase
     @render_word = "_" * @secret_word.length
@@ -19,8 +20,10 @@ class Game
   def guess(letter)
     response = :none
     letter = letter.to_s.upcase
-
-    if letter == "SAVE"
+    
+    if win?
+      response == :win
+    elsif letter == "SAVE"
       save_game
       response = :saved
     elsif letter == "LOAD"
@@ -30,13 +33,20 @@ class Game
       response = :repeat
     elsif  ("A".."Z").include? letter
       evaluate_letter(letter) ? response = :found : response = :miss
+      @prev_letters << letter
     end
 
-    @prev_letters << letter
-    output = {render_word:       @render_word,
-              missed_letters:    @missed_letters,
-              response:          response}
-    return output
+    response
+  end
+
+  def win?
+    @secret_word == @render_word
+  end
+
+  def get_status
+    {render_word:       @render_word,
+     missed_letters:    @missed_letters,
+     win:               win?}
   end
 
   def evaluate_letter(selected_letter)
@@ -63,18 +73,6 @@ class Game
     @secret_word = g.secret_word
     @render_word = g.render_word
     @prev_letters = g.prev_letters
-    @missed_letters = g.missed_letters.join(" ")
+    @missed_letters = g.missed_letters
   end
 end
-
-=begin
-puts "Do you want to load your saved game?"
-answere = gets.chomp.downcase
-if ["yes", "y"].include? answere
-  save_file = File.open("save.hmsv", "r")
-  g = YAML::load(save_file)
-else
-  g = Game.new
-end
-g.start
-=end

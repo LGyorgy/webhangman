@@ -1,14 +1,43 @@
 <html>
-<head></head>
+<head>
+  <style>
+    div.word {
+      letter-spacing: 5px;
+    }
+    input.letter_button {
+      height: 50px;
+      width:  50px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+    }
+  </style>
+</head>
 <body>
-
   <h1>Sinatra Hangman</h1>
-  <p><%= render_word %></p>
-  <p><%= missed_letters %></p>
-  <p><%= response %></p>
-  <form>
-    <input type="text" name="guess"/>
-    <input type="submit"/>
-  </form>
+  <div class="word"><p><%= render_word %></p></div>
+  <div class="missed_letters"><p><%= missed_letters %></p></div>
+  <% if win %>
+    <p><%= "You have won!"%></p>
+    <form method="post">
+      <button type="submit" name="guess" value="new_game">New Game</button>
+    </form>
+  <% else %>
+    <form method="post">
+      <% ("A".."Z").each do |letter| %>
+        <input class="letter_button" type="submit" name="guess" value="<%= letter %>" />
+        <% if letter == "M" %>
+          <br/>
+        <% end %>
+      <% end %>
+      <br/>
+      <button type="submit" name="guess" value="SAVE">Save Game</button>
+      <button type="submit" name="guess" value="LOAD">Load Game</button>
+      <button type="submit" name="guess" value="new_game">New Game</button>
+    </form>
+    
+    <p> <%= msg if msg %> </p>
+  <% end %>
 </body>
 </html>
