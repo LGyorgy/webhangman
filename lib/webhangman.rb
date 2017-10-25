@@ -7,10 +7,12 @@ enable :sessions
 get "/" do
   session[:game] = Game.new unless session[:game]
   hangman_values = session[:game].get_status
+  img = "/pics/#{hangman_values[:missed_letters].length}.png"
   erb :index, :locals => {render_word:    hangman_values[:render_word],
-                          missed_letters: hangman_values[:missed_letters].join(", "),
+                          missed_letters: hangman_values[:missed_letters],
+                          img:            img,
                           win:            hangman_values[:win],
-                          msg:            session.delete(:msg)
+                          msg:            session.delete(:msg),
                          }
 end
 

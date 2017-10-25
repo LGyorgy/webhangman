@@ -4,6 +4,10 @@
     div.word {
       letter-spacing: 5px;
     }
+    img.hangman_img {
+      height: 250px;
+      width: 250px;
+    }
     input.letter_button {
       height: 50px;
       width:  50px;
@@ -16,12 +20,20 @@
 </head>
 <body>
   <h1>Sinatra Hangman</h1>
+  <img class="hangman_img" src="<%= img %>" alt="Hangman"/>
   <div class="word"><p><%= render_word %></p></div>
-  <div class="missed_letters"><p><%= missed_letters %></p></div>
+  <div class="missed_letters"><p><%= missed_letters.join(", ") %></p></div>
   <% if win %>
     <p><%= "You have won!"%></p>
     <form method="post">
       <button type="submit" name="guess" value="new_game">New Game</button>
+      <button type="submit" name="guess" value="LOAD">Load Game</button>
+    </form>
+  <% elsif missed_letters.length >= 6 %>
+    <p><%= "You have lost :(" %></p>
+    <form method="post">
+      <button type="submit" name="guess" value="new_game">New Game</button>
+      <button type="submit" name="guess" value="LOAD">Load Game</button>
     </form>
   <% else %>
     <form method="post">
@@ -32,9 +44,9 @@
         <% end %>
       <% end %>
       <br/>
+      <button type="submit" name="guess" value="new_game">New Game</button>
       <button type="submit" name="guess" value="SAVE">Save Game</button>
       <button type="submit" name="guess" value="LOAD">Load Game</button>
-      <button type="submit" name="guess" value="new_game">New Game</button>
     </form>
     
     <p> <%= msg if msg %> </p>
