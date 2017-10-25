@@ -1,4 +1,3 @@
-require "sinatra"
-require "./lib/webhangman"
+require "./webhangman"
 
 run Sinatra::Application
